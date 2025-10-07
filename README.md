@@ -19,8 +19,8 @@ The entire stack is containerized using **Docker** for consistent deployment, sc
 - **Batch Settlement**  
   Handle end-of-day settlements that aggregate multiple transactions into one batch.
 
-- **Device Authentication (HMAC-SHA256)**  
-  Protect sensitive endpoints (`/sale`, `/settlement`) using per-terminal HMAC signatures.
+- **Device Authentication (JWT-HS256)**  
+  Protect sensitive endpoints (`/sale`, `/settlement`) using per-terminal JWT token.
 
 - **Secure Internal Communication (gRPC)**  
   The `edc-service` communicates with the internal `core-service` using **gRPC** secured by a pre-shared secret token.
@@ -53,8 +53,8 @@ The entire stack is containerized using **Docker** for consistent deployment, sc
 
 ### **1. Clone the Repository**
 ```bash
-git clone <your-repository-url>
-cd <your-project-directory>
+git clone https://github.com/revandpratama/arnatech-edc.git
+cd arnatech-edc
 ```
 
 ### **2. Build and Run with Docker Compose**
