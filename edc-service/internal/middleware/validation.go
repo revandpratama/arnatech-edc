@@ -25,22 +25,37 @@ func Validate(dto any) fiber.Handler {
 			})
 		}
 
-		if err := util.Validate.Struct(body); err != nil {
-			if validationErrors, ok := err.(validator.ValidationErrors); ok {
-				var errors []ValidateError
-				for _, e := range validationErrors {
-					errors = append(errors, ValidateError{
-						Field: e.Field(),
-						Tag:   e.Tag(),
-						Value: e.Param(),
-					})
-				}
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"error":  "validation failed",
-					"fields": errors,
-				})
-			}
-		}
+		val := reflect.ValueOf(body).Elem()
+		var validationErrors validator.ValidationErrors
+
+		if val.Kind() == reflect.Slice {
+            for i := 0; i < val.Len(); i++ {
+                element := val.Index(i).Interface()
+                if err := util.Validate.Struct(element); err != nil {
+                    validationErrors = append(validationErrors, err.(validator.ValidationErrors)...)
+                }
+            }
+        } else {
+            // validate directly if single struct
+            if err := util.Validate.Struct(body); err != nil {
+                validationErrors = err.(validator.ValidationErrors)
+            }
+        }
+
+		if len(validationErrors) > 0 {
+            var errors []ValidateError
+            for _, e := range validationErrors {
+                errors = append(errors, ValidateError{
+                    Field: e.Field(),
+                    Tag:   e.Tag(),
+                    Value: e.Param(),
+                })
+            }
+            return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+                "error":  "validation failed",
+                "fields": errors,
+            })
+        }
 
 		c.Locals("body", body)
 

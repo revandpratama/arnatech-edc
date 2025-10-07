@@ -50,7 +50,6 @@ func (s *Server) Run() {
 	}
 	log.Println("Connected to database successfully")
 
-
 	GRPC_PORT := fmt.Sprintf("core-service:%s", config.ENV.GRPC_PORT)
 	conn, err := grpc.NewClient(GRPC_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -70,8 +69,13 @@ func (s *Server) Run() {
 	terminalRepository := repository.NewTerminalRepository(adapter.DB)
 	transactionUsecase := usecase.NewTransactionUsecase(transactionRepository, merchantRepository, terminalRepository)
 
-	handler := handler.NewTransactionHandler(transactionUsecase)
-	v1.Post("/transactions/sale", middleware.Validate(dto.SaleRequestDTO{}), handler.CreateTransaction)
+	transactionHandler := handler.NewTransactionHandler(transactionUsecase)
+	v1.Post("/transactions/sale", middleware.Validate(dto.SaleRequestDTO{}), transactionHandler.CreateTransaction)
+
+	settlementRepository := repository.NewSettlementRepository(adapter.DB)
+	settlementUsecase := usecase.NewSettlementUsecase(settlementRepository, transactionRepository)
+	settlementHandler := handler.NewSettlementHandler(settlementUsecase)
+	v1.Post("/settlements", middleware.Validate([]dto.SaleRequestDTO{}), settlementHandler.CreateSettlement)
 
 	go func() {
 		REST_PORT := fmt.Sprintf(":%s", config.ENV.REST_PORT)
@@ -81,8 +85,6 @@ func (s *Server) Run() {
 
 		log.Printf("Server is running on port %s \n", REST_PORT)
 	}()
-
-	
 
 	select {
 	case sh := <-s.shutdownCh:
