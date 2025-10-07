@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package core;
+
+option go_package = "./generated/core";
+
+import "google/protobuf/timestamp.proto";
+
+
+service CoreBankingService {
+  rpc AuthorizeTransaction(AuthorizeTransactionRequest) returns (AuthorizeTransactionResponse);
+}
+
+message AuthorizeTransactionRequest {
+    string transaction_id = 1;
+    string merchant_id = 2;
+    string terminal_id = 3;
+    float amount = 4;
+    string card_number = 5;
+    google.protobuf.Timestamp  timestamp = 6;
+}
+
+
+enum AuthorizationStatus {
+  STATUS_UNSPECIFIED = 0;
+  APPROVED = 1;
+  DECLINED = 2;
+}
+
+message AuthorizeTransactionResponse {
+    AuthorizationStatus status = 1;
+    string message = 2;
+}
