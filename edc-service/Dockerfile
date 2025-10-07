@@ -24,6 +24,6 @@ COPY --from=builder /app/main .
 
 COPY --from=builder /api ./api
 
-EXPOSE 50051
+EXPOSE 8100
 
 CMD ["./main"]
