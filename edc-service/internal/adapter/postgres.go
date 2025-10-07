@@ -12,7 +12,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() error {
-	dataSourceName := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable timezone=Asia/Jakarta",
+	dataSourceName := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		config.ENV.DB_HOST,
 		config.ENV.DB_USER,
 		config.ENV.DB_PASSWORD,
