@@ -88,9 +88,9 @@ func (t *transactionUsecase) CreateTransaction(ctx context.Context, saleReq *dto
 		status = "approved"
 		message = "Transaction authorized"
 	} else {
-		transaction.Status = "rejected"
-		status = "rejected"
-		message = "Transaction rejected"
+		transaction.Status = "declined"
+		status = "declined"
+		message = "Transaction declined"
 	}
 
 	transaction, err = t.transactionRepository.CreateTransaction(transaction)
