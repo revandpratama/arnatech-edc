@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	REST_PORT string `mapstructure:"REST_PORT"`
-	GRPC_PORT string `mapstructure:"GRPC_PORT"`
+	REST_PORT            string `mapstructure:"REST_PORT"`
+	GRPC_PORT            string `mapstructure:"GRPC_PORT"`
+	INTERNAL_GRPC_SECRET string `mapstructure:"INTERNAL_GRPC_SECRET"`
 
 	JWT_SECRET            string `mapstructure:"JWT_SECRET"`
 	JWT_EXPIRATION_SECOND string `mapstructure:"JWT_EXPIRATION_SECOND"`
