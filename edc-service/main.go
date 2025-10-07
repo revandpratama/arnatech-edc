@@ -62,6 +62,11 @@ func (s *Server) Run() {
 
 	app := fiber.New()
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		// Redirects the request to the swagger page
+		return c.Redirect("/swagger")
+	})
+
 	app.Static("/swagger.yaml", "./api/swagger.yaml")
 
 	app.Get("/swagger/*", swagger.New(swagger.Config{
