@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 func ConnectDB() error {
 	dataSourceName := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable timezone=Asia/Jakarta",
 		config.ENV.DB_HOST,
@@ -39,6 +41,8 @@ func ConnectDB() error {
 	if err := sqlDB.Ping(); err != nil {
 		return fmt.Errorf("database ping failed: %w", err)
 	}
+
+	DB = db
 
 	return nil
 }
