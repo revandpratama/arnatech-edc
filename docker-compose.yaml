@@ -1,0 +1,75 @@
+
+services:
+  # 1. The main EDC REST API service
+  edc-service:
+    build: 
+      context: . # Use the project root as the build context
+      dockerfile: edc-service/Dockerfile
+    container_name: edc_service_app
+    ports:
+      - "${REST_PORT}:${REST_PORT}"
+    environment:
+      - REST_PORT=${REST_PORT}
+      - GRPC_PORT=${GRPC_PORT}
+
+      - INTERNAL_GRPC_SECRET=${INTERNAL_GRPC_SECRET}
+
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_SECOND=${JWT_EXPIRATION_SECOND}
+
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+
+      - DB_SOURCE=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable
+
+      - CORE_SERVICE_ADDR=core-service:${GRPC_PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+      core-service:
+        condition: service_started
+    networks:
+      - edc_network
+
+  core-service:
+    build: 
+      context: . # Use the project root as the build context
+      dockerfile: core-service/Dockerfile
+    container_name: core_service_app
+    ports:
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    environment:
+      - GRPC_PORT=${GRPC_PORT}
+      - INTERNAL_GRPC_SECRET=${INTERNAL_GRPC_SECRET}
+    networks:
+      - edc_network
+
+  db:
+    image: postgres:17
+    container_name: edc_postgres_db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - PGTZ=Asia/Jakarta
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - edc_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  edc_network:
+    driver: bridge
