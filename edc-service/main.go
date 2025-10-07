@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 	"github.com/revandpratama/edc-service/config"
 	pb "github.com/revandpratama/edc-service/generated/core"
 	"github.com/revandpratama/edc-service/internal/adapter"
@@ -61,6 +62,17 @@ func (s *Server) Run() {
 
 	app := fiber.New()
 
+	app.Static("/swagger.yaml", "./api/swagger.yaml")
+
+	app.Get("/swagger/*", swagger.New(swagger.Config{
+		// The URL pointing to the yaml file that should be displayed.
+		URL: "/swagger.yaml",
+	}))
+
+	app.Get("/health", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"status": "ok"})
+	})
+
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
@@ -80,7 +92,7 @@ func (s *Server) Run() {
 	settlementRepository := repository.NewSettlementRepository(adapter.DB)
 	settlementUsecase := usecase.NewSettlementUsecase(settlementRepository, transactionRepository)
 	settlementHandler := handler.NewSettlementHandler(settlementUsecase)
-	v1.Post("/settlements", middleware.AuthMiddleware(), middleware.Validate([]dto.SaleRequestDTO{}), settlementHandler.CreateSettlement)
+	v1.Post("/transactions/settlements", middleware.AuthMiddleware(), middleware.Validate([]dto.SaleRequestDTO{}), settlementHandler.CreateSettlement)
 
 	go func() {
 		REST_PORT := fmt.Sprintf(":%s", config.ENV.REST_PORT)
