@@ -12,7 +12,7 @@ type Settlement struct {
 	TotalCount    int       `gorm:"not null"`
 	ApprovedCount int       `gorm:"not null"`
 	DeclinedCount int       `gorm:"not null"`
-	TotalAmount   float64   `gorm:"type:numeric(15, 2);not null"`
+	TotalAmount   int64     `gorm:"type:numeric(15, 2);not null"`
 	CreatedAt     time.Time `gorm:"not null"`
 	UpdatedAt     time.Time `gorm:"not null"`
 	DeletedAt     gorm.DeletedAt

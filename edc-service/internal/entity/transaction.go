@@ -17,7 +17,7 @@ const (
 type Transaction struct {
 	ID                   uint              `gorm:"primary_key;not null"`
 	TransactionID        string            `gorm:"type:varchar(100);unique;not null"`
-	Amount               float64           `gorm:"type:numeric(12, 2);not null"`
+	Amount               int64           `gorm:"type:numeric(12, 2);not null"`
 	CardNumberMasked     string            `gorm:"type:varchar(20);not null"`
 	Status               TransactionStatus `gorm:"type:transaction_status;not null;default:pending"`
 	TransactionTimestamp time.Time         `gorm:"not null"`

@@ -5,7 +5,7 @@ import "time"
 type SaleRequestDTO struct {
 	MerchantID string    `json:"merchant_id" validate:"required"`
 	TerminalID string    `json:"terminal_id" validate:"required"`
-	Amount     float64   `json:"amount" validate:"required,gt=0"`
+	Amount     int64     `json:"amount" validate:"required,gt=0"`
 	CardNumber string    `json:"card_number" validate:"required"`
 	Timestamp  time.Time `json:"timestamp" validate:"required"`
 }
