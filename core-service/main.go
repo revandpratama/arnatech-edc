@@ -1,21 +1,33 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
+	"github.com/revandpratama/core-service/config"
 	pb "github.com/revandpratama/core-service/generated/core"
 	"github.com/revandpratama/core-service/handler"
+	"github.com/revandpratama/core-service/middleware"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
+
+	config.LoadConfig()
+
+	GRPC_PORT := fmt.Sprintf(":%s", config.ENV.GRPC_PORT)
+	lis, err := net.Listen("tcp", GRPC_PORT)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	opts := []grpc.ServerOption{
+		// Add your token interceptor as a unary interceptor.
+		grpc.UnaryInterceptor(middleware.TokenInterceptor),
+	}
+
+	s := grpc.NewServer(opts...)
 
 	h := handler.NewHandler()
 
@@ -27,4 +39,5 @@ func main() {
 	}
 
 }
+
 // protoc --proto_path=shared/proto  --go_out=. --go-grpc_out=. shared/proto/core.proto
