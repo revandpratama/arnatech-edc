@@ -64,18 +64,23 @@ func (s *Server) Run() {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
+	authRepository := repository.NewAuthRepository(adapter.DB)
+	authUsecase := usecase.NewAuthUsecase(authRepository)
+	authHandler := handler.NewAuthHandler(authUsecase)
+	v1.Post("/auth", middleware.Validate(dto.AuthRequestDTO{}), authHandler.GetToken)
+
 	transactionRepository := repository.NewTransactionRepository(adapter.DB, c)
 	merchantRepository := repository.NewMerchantRepository(adapter.DB)
 	terminalRepository := repository.NewTerminalRepository(adapter.DB)
 	transactionUsecase := usecase.NewTransactionUsecase(transactionRepository, merchantRepository, terminalRepository)
 
 	transactionHandler := handler.NewTransactionHandler(transactionUsecase)
-	v1.Post("/transactions/sale", middleware.Validate(dto.SaleRequestDTO{}), transactionHandler.CreateTransaction)
+	v1.Post("/transactions/sale", middleware.AuthMiddleware(), middleware.Validate(dto.SaleRequestDTO{}), transactionHandler.CreateTransaction)
 
 	settlementRepository := repository.NewSettlementRepository(adapter.DB)
 	settlementUsecase := usecase.NewSettlementUsecase(settlementRepository, transactionRepository)
 	settlementHandler := handler.NewSettlementHandler(settlementUsecase)
-	v1.Post("/settlements", middleware.Validate([]dto.SaleRequestDTO{}), settlementHandler.CreateSettlement)
+	v1.Post("/settlements", middleware.AuthMiddleware(), middleware.Validate([]dto.SaleRequestDTO{}), settlementHandler.CreateSettlement)
 
 	go func() {
 		REST_PORT := fmt.Sprintf(":%s", config.ENV.REST_PORT)
