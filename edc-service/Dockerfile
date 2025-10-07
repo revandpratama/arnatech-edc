@@ -6,7 +6,8 @@ WORKDIR /app
 # Copy all the necessary source code first
 # Docker will place them inside /app
 COPY ./edc-service ./edc-service
-COPY ./shared ./shared
+COPY ./shared/ ../shared/
+COPY ./api/ ../api/
 
 # -- The Fix is Here --
 # Now, change the working directory to be inside your service's code
@@ -29,6 +30,8 @@ WORKDIR /app
 # Copy the compiled binary from the builder stage.
 # The source path /app/main is absolute and easy to find.
 COPY --from=builder /app/main .
+
+COPY --from=builder /api ./api
 
 EXPOSE 50051
 
