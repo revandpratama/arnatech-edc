@@ -28,7 +28,7 @@ func (h *Handler) AuthorizeTransaction(ctx context.Context, req *pb.AuthorizeTra
 		message = "Transaction approved"
 	} else {
 		status = 2
-		message = "Transaction rejected"
+		message = "Transaction declined"
 	}
 
 	return &pb.AuthorizeTransactionResponse{
