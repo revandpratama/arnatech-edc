@@ -9,7 +9,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/revandpratama/edc-service/config"
+	pb "github.com/revandpratama/edc-service/generated/core"
 	"github.com/revandpratama/edc-service/internal/adapter"
+	"github.com/revandpratama/edc-service/internal/dto"
+	"github.com/revandpratama/edc-service/internal/handler"
+	"github.com/revandpratama/edc-service/internal/middleware"
+	"github.com/revandpratama/edc-service/internal/repository"
+	"github.com/revandpratama/edc-service/internal/usecase"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -36,14 +44,34 @@ func (s *Server) Run() {
 
 	config.LoadConfig()
 	log.Println("Config loaded successfully")
-	log.Println(config.ENV.REST_PORT)
 
 	if err := adapter.ConnectDB(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	log.Println("Connected to database successfully")
 
+
+	GRPC_PORT := fmt.Sprintf("core-service:%s", config.ENV.GRPC_PORT)
+	conn, err := grpc.NewClient(GRPC_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to dial: %v", err)
+	}
+	defer conn.Close()
+
+	c := pb.NewCoreBankingServiceClient(conn)
+
 	app := fiber.New()
+
+	api := app.Group("/api")
+	v1 := api.Group("/v1")
+
+	transactionRepository := repository.NewTransactionRepository(adapter.DB, c)
+	merchantRepository := repository.NewMerchantRepository(adapter.DB)
+	terminalRepository := repository.NewTerminalRepository(adapter.DB)
+	transactionUsecase := usecase.NewTransactionUsecase(transactionRepository, merchantRepository, terminalRepository)
+
+	handler := handler.NewTransactionHandler(transactionUsecase)
+	v1.Post("/transactions/sale", middleware.Validate(dto.SaleRequestDTO{}), handler.CreateTransaction)
 
 	go func() {
 		REST_PORT := fmt.Sprintf(":%s", config.ENV.REST_PORT)
@@ -53,6 +81,8 @@ func (s *Server) Run() {
 
 		log.Printf("Server is running on port %s \n", REST_PORT)
 	}()
+
+	
 
 	select {
 	case sh := <-s.shutdownCh:
