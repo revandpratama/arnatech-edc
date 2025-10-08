@@ -6,8 +6,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
 	"github.com/revandpratama/edc-service/config"
 	pb "github.com/revandpratama/edc-service/generated/core"
@@ -79,6 +83,32 @@ func (s *Server) Run() {
 
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowCredentials: true,
+	}))
+
+	v1.Use(limiter.New(limiter.Config{
+		Max: 10,
+		KeyGenerator: func(c *fiber.Ctx) string {
+			terminalID, ok := c.Locals("terminalID").(string)
+			if ok {
+				return terminalID
+			}
+
+			return c.IP()
+		},
+		Expiration: time.Second * 10,
+		LimitReached: func(c *fiber.Ctx) error {
+			return c.Status(429).JSON(fiber.Map{"error": "rate limit exceeded"})
+		},
+	}))
+
+	v1.Use(logger.New(logger.Config{
+		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+	}))
 
 	authRepository := repository.NewAuthRepository(adapter.DB)
 	authUsecase := usecase.NewAuthUsecase(authRepository)
