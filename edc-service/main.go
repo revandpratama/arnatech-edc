@@ -70,7 +70,6 @@ func (s *Server) Run() {
 	app.Static("/swagger.yaml", "./api/swagger.yaml")
 
 	app.Get("/swagger/*", swagger.New(swagger.Config{
-		// The URL pointing to the yaml file that should be displayed.
 		URL: "/swagger.yaml",
 	}))
 

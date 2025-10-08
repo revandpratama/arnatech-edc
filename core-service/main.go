@@ -23,7 +23,6 @@ func main() {
 	}
 
 	opts := []grpc.ServerOption{
-		// Add your token interceptor as a unary interceptor.
 		grpc.UnaryInterceptor(middleware.TokenInterceptor),
 	}
 
@@ -39,5 +38,3 @@ func main() {
 	}
 
 }
-
-// protoc --proto_path=shared/proto  --go_out=. --go-grpc_out=. shared/proto/core.proto
