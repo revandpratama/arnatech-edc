@@ -14,7 +14,7 @@ The entire stack is containerized using **Docker** for consistent deployment, sc
 ## 🚀 Features
 
 - **Sale Transaction Processing**  
-  Securely process individual sale transactions via REST API.
+  Securely process individual sale transactions via REST API with rate limiter and auth middlewares.
 
 - **Batch Settlement**  
   Handle end-of-day settlements that aggregate multiple transactions into one batch.
