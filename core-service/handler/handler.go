@@ -6,10 +6,6 @@ import (
 	pb "github.com/revandpratama/core-service/generated/core"
 )
 
-// type Handler interface {
-// 	AuthorizeTransaction(ctx context.Context, req *pb.AuthorizeTransactionRequest) (*pb.AuthorizeTransactionResponse, error)
-// }
-
 type Handler struct {
 	pb.UnimplementedCoreBankingServiceServer
 }

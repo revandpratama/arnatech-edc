@@ -34,7 +34,7 @@ func NewSettlementUsecase(settlementRepository repository.SettlementRepository, 
 
 func (s *settlementUsecase) CreateSettlement(ctx context.Context, settlementReq []dto.SaleRequestDTO) (*dto.SettlementResponseDTO, error) {
 
-	var transactionIdentifiers []repository.TransactionIdentifier // Define this struct based on what you use to find txs
+	var transactionIdentifiers []repository.TransactionIdentifier 
 	for _, req := range settlementReq {
 		transactionIdentifiers = append(transactionIdentifiers, repository.TransactionIdentifier{
 			TerminalID: req.TerminalID,
@@ -45,13 +45,13 @@ func (s *settlementUsecase) CreateSettlement(ctx context.Context, settlementReq 
 
 	transactions, err := s.TransactionRepositoryForSettlement.FindUnsettledByDetails(ctx, transactionIdentifiers)
 	if err != nil {
-		return nil, err // Handle errors, e.g., some transactions not found
+		return nil, err 
 	}
 
 	var totalAmount int64
 	var approvedCount int
 	var declinedCount int
-	transactionIDs := []uint{} // Collect DB primary keys
+	transactionIDs := []uint{} 
 	for _, tx := range transactions {
 		if tx.Status == "approved" {
 			totalAmount += tx.Amount
