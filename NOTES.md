@@ -1,5 +1,9 @@
 ## 🤖 AI Usage Notes
 
+AI Used: 
+- ChatGPT 5 for general purpose advice and assistant
+- Gemini Pro: for advance debugging and reasoning that require bigger context and more thoughtful approach
+
 This project was developed with the assistance of AI tools to enhance productivity and ensure best practices during development. Below are the specific areas where AI was utilized:
 
 ### 1. Debugging
